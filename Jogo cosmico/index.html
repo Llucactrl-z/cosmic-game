@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game: Match two</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        #image {
+            max-width: 300px;
+            margin: 20px auto;
+            display: block;
+            border-radius: 8px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #feedback {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+            min-height: 24px;
+        }
+        .correct {
+            color: #81C784;
+        }
+        .incorrect {
+            color: #a30f0f;
+        }
+        #score, #timer {
+            font-size: 20px;
+            margin: 10px 0;
+            color: #BB86FC;
+        }
+        #next-btn {
+            background-color: #210445;
+            display: none;
+        }
+        #next-btn:hover {
+            background-color: #5e0bda;
+        }
+        #start-btn {
+            background-color: #0092e6;
+            font-size: 18px;
+            padding: 12px 24px;
+            margin: 20px 0;
+        }
+        #start-btn:hover {
+            background-color: #0092e6;
+        }
+        .hidden {
+            display: none;
+        }
+        h1 {
+            color: #BB86FC;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Match the name and the image:</h1>
+        <button id="start-btn" onclick="startGame()">Start</button>
+
+        <div id="game-content" class="hidden">
+            <div id="score">Score: 0</div>
+            <div id="timer">Time: 10</div>
+            <img id="image" src="" alt="Imagem do jogo">
+            <div id="feedback"></div>
+            <div class="options">
+                <button onclick="checkAnswer(0)">Opção 1</button>
+                <button onclick="checkAnswer(1)">Opção 2</button>
+                <button onclick="checkAnswer(2)">Opção 3</button>
+            </div>
+            <button id="next-btn" onclick="nextQuestion()">Next >></button>
+        </div>
+    </div>
+
+    <script>
+        // Lista de perguntas (imagem, opções, resposta correta)
+        const questions = [
+            {
+                image: "img/telescope.jpeg",
+                options: ["Telescope", "Stars", "Radio Waves"],
+                correct: "Telescope"
+            },
+            {
+                image: "img/planet.webp",
+                options: ["Star", "Tools", "Planet"],
+                correct: "Planet"
+            },
+            {
+                image: "img/black hole.jpg",
+                options: ["Black Hole", "Galaxy", "Observation"],
+                correct: "Black Hole"
+            },
+            {
+                image: "img/celestial bodies.png",
+                options: ["Telescopes", "Celestial Bodies", "Microwaves"],
+                correct: "Celestial Bodies"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let timeLeft = 10;
+        let timer;
+
+        // Função para iniciar o jogo
+        function startGame() {
+            document.getElementById("start-btn").classList.add("hidden");
+            document.getElementById("game-content").classList.remove("hidden");
+            loadQuestion();
+        }
+
+        // Função para carregar a pergunta atual
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById("image").src = q.image;
+            const buttons = document.querySelectorAll(".options button");
+            buttons[0].textContent = q.options[0];
+            buttons[1].textContent = q.options[1];
+            buttons[2].textContent = q.options[2];
+            document.getElementById("feedback").textContent = "";
+            document.getElementById("feedback").className = "";
+            document.getElementById("next-btn").style.display = "none";
+            startTimer();
+        }
+
+        // Função para verificar a resposta
+        function checkAnswer(index) {
+            clearInterval(timer);
+            const q = questions[currentQuestion];
+            const feedback = document.getElementById("feedback");
+            if (q.options[index] === q.correct) {
+                feedback.textContent = "Correct!";
+                feedback.className = "correct";
+                score+= 5;
+            } else {
+                feedback.textContent = `Incorrect! The corect answer was: ${q.correct}`;
+                feedback.className = "incorrect";
+            }
+            document.getElementById("score").textContent = `Score: ${score}`;
+            document.getElementById("next-btn").style.display = "block";
+        }
+
+        // Função para o cronômetro
+        function startTimer() {
+            timeLeft = 10;
+            document.getElementById("timer").textContent = `Tempo: ${timeLeft}`;
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timer").textContent = `Tempo: ${timeLeft}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    document.getElementById("feedback").textContent = `Tempo esgotado! A resposta era: ${q.correct}`;
+                    document.getElementById("feedback").className = "incorrect";
+                    document.getElementById("next-btn").style.display = "block";
+                }
+            }, 1000);
+        }
+
+        // Função para ir para a próxima pergunta
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                document.getElementById("image").src = "img/background image.jpg";
+                document.getElementById("feedback").textContent = `End of the game! Your final score is: ${score}`;
+                document.getElementById("options").innerHTML = "hidden";
+                document.getElementById("next-btn").style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
